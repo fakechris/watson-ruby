@@ -282,6 +282,17 @@ module Watson
             end
             debug_print "Did not find in #{ _closed["title"] }\n"
           end
+
+          debug_print "Checking if issue has been resolved\n"
+          @config.gitlab_issues[:closed].each do  | _closed | 
+            if _closed["description"].include?(_issue[:md5])
+              debug_print "Found in #{ _closed["description"] }, not posting\n"
+              cprint BOLD + " [" + RESET
+              cprint GREEN + BOLD + "Resolved on Bitbucket" + RESET
+              cprint BOLD + "]\n" + RESET
+            end
+            debug_print "Did not find in #{ _closed["title"] }\n"
+          end
           cprint "\n"
 
         end

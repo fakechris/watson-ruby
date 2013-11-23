@@ -173,7 +173,7 @@ module Watson
         print "   -h, --help            print help\n"
         print "   -i, --ignore          list of files, directories, or types to ignore\n"
         print "   -p, --parse-depth     depth to recursively parse directories\n"
-        print "   -r, --remote          list / create tokens for Bitbucket/GitHub\n"
+        print "   -r, --remote          list / create tokens for Bitbucket/GitHub/GitLab\n"
         print "   -t, --tags            list of tags to search for\n"
         print "   -u, --update          update remote repos with current issues\n"
         print "   -v, --version      print watson version and info\n"
@@ -415,7 +415,7 @@ module Watson
 
     ###########################################################
     # setup_remote
-    # Handle setup of remote issue posting for GitHub and Bitbucket 
+    # Handle setup of remote issue posting for GitHub and Bitbucket or GitLab 
     def setup_remote(args)
 
       # Identify method entry
@@ -427,7 +427,7 @@ module Watson
   
       # Check the config for any remote entries (GitHub or Bitbucket) and print
       # We *should* always have a repo + API together, but API should be enough
-      if @config.github_api.empty? && @config.bitbucket_api.empty?
+      if @config.github_api.empty? && @config.bitbucket_api.empty? && @config.gitlab_api.empty?
         Printer.print_status "!", YELLOW
         print BOLD + "No remotes currently exist\n\n" + RESET
       end
@@ -442,6 +442,10 @@ module Watson
         print BOLD + "Bitbucket Repo : " + RESET + "#{ @config.bitbucket_repo }\n\n" + RESET
       end
 
+      if !@config.gitlab_api.empty?
+        print BOLD + "Gitlab User : " + RESET + "#{ @config.gitlab_api }\n" + RESET
+      end
+
       # If github or bitbucket passed, setup
       # If just -r (0 args) do nothing and only have above printed
       # If more than 1 arg is passed, unrecognized, warn user 
@@ -454,6 +458,10 @@ module Watson
         when "bitbucket"
           debug_print "Bitbucket setup called from CL\n"
           Watson::Remote::Bitbucket.setup(@config) 
+        
+        when "gitlab"
+          debug_print "Gitlab setup called from CL\n"
+          Watson::Remote::GitLab.setup(@config) 
         end
       elsif args.length > 1
         Printer.print_status "x", RED

@@ -62,6 +62,11 @@ module Watson
     # Hash to hold list of all Bitbucket issues associated with repo  
     attr_accessor :bitbucket_issues 
     
+    attr_accessor :gitlab_valid
+    attr_accessor :gitlab_api
+    attr_accessor :gitlab_host
+    attr_accessor :gitlab_issues
+    attr_accessor :gitlab_project
 
     ###########################################################
     # Config initialization method to setup necessary parameters, states, and vars
@@ -114,6 +119,14 @@ module Watson
       @bitbucket_issues   = {:open   => Hash.new(),
                    :closed => Hash.new()
                   }
+
+      @gitlab_valid        = false
+      @gitlab_host = ""
+      @gitlab_api = ""
+      @gitlab_issues  = {:open => Hash.new(),
+          :closed => Hash.new()
+      }
+      @gitlab_project = ""
     end
 
 
@@ -127,13 +140,17 @@ module Watson
       # check_conf should create if no conf found, exit entirely if can't do either 
       exit if check_conf == false
       read_conf
-      
+
       unless @github_api.empty? && @github_api.empty?
         Remote::GitHub.get_issues(self)
       end
 
       unless @bitbucket_api.empty? && @bitbucket_repo.empty?
         Remote::Bitbucket.get_issues(self)
+      end
+
+      unless @gitlab_api.empty? && @gitlab_api.empty?
+        Remote::GitLab.get_issues(self)
       end
     end
 
@@ -375,7 +392,18 @@ module Watson
           # Same as GitHub repo parse above
           @bitbucket_repo = _line.chomp!
           debug_print "Bitbucket Repo: #{ @bitbucket_repo }\n"
+        
+        when "gitlab_api"
+          @gitlab_api = _line.chomp!
+          debug_print "GitLab API: #{ @gitlab_api }\n"
 
+        when "gitlab_host"
+          @gitlab_host = _line.chomp!
+          debug_print "GitLab Host: #{ @gitlab_host }\n"
+
+        when "gitlab_project"
+          @gitlab_project = _line.chomp!
+          debug_print "GitLab Project: #{ @gitlab_project }\n"
 
         else  
           debug_print "Unknown tag found #{_section}\n"           
